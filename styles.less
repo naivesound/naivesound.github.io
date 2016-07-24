@@ -1,0 +1,143 @@
+@import 'https://fonts.googleapis.com/css?family=Lato:400,700,300,900';
+
+@import 'flexboxgrid.min.css';
+
+@side-padding: 2rem;
+
+@font-scale-ratio: 1.6;
+@small-size: 1rem;
+@normal-size: @small-size * @font-scale-ratio;
+@h2-size: @normal-size * @font-scale-ratio;
+@h1-size: @h2-size * @font-scale-ratio * @font-scale-ratio;
+
+@color-red: #f03103;
+@color-white: #ffffff;
+@color-black: #240201;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  font-family: 'Lato', sans-serif;
+  color: @color-black;
+  background-image: url('bg.svg');
+  background-repeat: repeat-y;
+  background-size: contain;
+  background-color: @color-red;
+}
+a { text-decoration: none; }
+p { margin-bottom: 2em; }
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.social-links {
+  display: flex;
+  justify-content: space-around;
+  a {
+    margin-top: @side-padding;
+    margin-bottom: @side-padding;
+    flex: 1;
+    font-size: @small-size;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 900;
+    color: @color-white;
+    &:hover {
+      color: @color-black;
+    }
+  }
+}
+
+.headline {
+  h1 {
+    font-size: 11vw;
+    text-align: center;
+    color: @color-white;
+    margin-bottom: 3rem;
+  }
+  .line {
+    display: none;
+  }
+}
+
+.products {
+  padding: 0 @side-padding;
+  .product {
+    color: @color-black;
+  }
+  h2 {
+    font-size: @h2-size;
+    padding-bottom: 0.5em;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid @color-black;
+    font-weight: 700;
+  }
+  p {
+    font-size: @normal-size;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  a:hover .selection {
+    color: @color-red;
+    background-color: @color-black;
+  }
+}
+
+@media screen and (min-width: 62em) {
+  .headline {
+    .line {
+      display: block;
+      height: 6rem;
+      width: 100%;
+    }
+  }
+}
+
+@media screen and (min-width: 48em) {
+  @small-size: 1rem;
+  // On large screens social links are right-aligned and placed close to each other
+  .social-links {
+    justify-content: flex-end;
+    a {
+      flex: 0;
+      margin-right: @side-padding;
+      font-size: @small-size;
+    }
+  }
+
+  // On large screens headline is vertically centerd and right-aligned
+  // Also, the sound wave line becomes visible
+  .headline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 50vh;
+    h1 {
+      font-size: @h1-size;
+      font-weight: 700;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      padding: 0 @side-padding;
+      text-align: right;
+    }
+  }
+
+  .products {
+    position: absolute;
+    top: 50vh;
+  }
+}
+
+@media screen and (min-aspect-ratio: 16/10) {
+  body {
+    background-size: cover;
+  }
+}

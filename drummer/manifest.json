@@ -13,7 +13,7 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/",
+  "start_url": "https://naivesound.com/drummer",
   "display": "standalone",
   "theme_color": "#d35400",
   "background_color": "#ecf0f1"

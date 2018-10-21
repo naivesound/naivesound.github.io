@@ -161,7 +161,7 @@ class Drummer {
   constructor(sampleRate) {
     this.sampleRate = sampleRate;
     // Initialize samples
-    this.samples = {};
+    this.samples = [];
     for (let id in SAMPLES) {
       const s = window.atob(SAMPLES[id]);
       const wave = new Float32Array(s.length / 2);
@@ -175,20 +175,14 @@ class Drummer {
         }
         wave[i] = v / 0x8000;
       }
-      this.samples[id] = {
+      this.samples.push({
+        id: id,
         offset: 0,
         buffer: wave,
         volume: 0,
-      };
+      });
     }
     
-    // Initialize slight volume randomization
-    const shuffle = 0.5;
-    this.shuffleVolume = new Float32Array(127);
-    for (let i = 0; i < this.shuffleVolume.length; i++) {
-      this.shuffleVolume[i] = (1 - shuffle/2) + Math.random() * shuffle;
-    }
-
     try {
       this.state = JSON.parse(window.localStorage['drummer']);
     } catch (e) {
@@ -207,24 +201,28 @@ class Drummer {
     const p = PATTERNS[this.state.genre][this.state.pattern];
     const bps = this.state.bpm / 60 * p.speed / 4;
     for (let i = 0; i < out.length; i++) {
-      out[i] = 0;
-      if (this.state.offset == 0) {
+      let v = 0;
+      if (this.state.offset === 0) {
         for (let j = 0; j < p.pattern.length; j++) {
           const volume = p.pattern[j][this.state.step % p.pattern[j].length];
           if (volume > 0) {
             const drum = p.drums[j];
-            const shuffle = this.shuffleVolume[this.state.step % this.shuffleVolume.length];
-            this.samples[drum].volume = volume / 9 * shuffle;
-            this.samples[drum].offset = 0;
+            for (let i = 0; i < this.samples.length; i++) {
+              if (this.samples[i].id === drum) {
+                this.samples[i].volume = volume / 9;
+                this.samples[i].offset = 0;
+                break;
+              }
+            }
           }
         }
       }
 
-      for (let id in this.samples) {
-        const sample = this.samples[id];
+      for (let i = 0; i < this.samples.length; i++) {
+        const sample = this.samples[i];
         if (sample.volume > 0) {
-          out[i] = out[i] + sample.buffer[sample.offset] * sample.volume;
-          sample.offset = sample.offset + 1;
+          v = v + sample.buffer[sample.offset] * sample.volume;
+          sample.offset++;
           if (sample.offset == sample.buffer.length) {
             sample.offset = 0;
             sample.volume = 0;
@@ -232,6 +230,7 @@ class Drummer {
         }
       }
 
+      out[i] = v;
       this.state.offset++;
       if (this.state.offset > this.sampleRate / bps) {
         this.state.step++;
@@ -331,7 +330,7 @@ class UI {
 const audio = new AudioContext();
 const drummer = new Drummer(audio.sampleRate);
 const gain = audio.createGain();
-const drums = audio.createScriptProcessor(1024, 1, 1);
+const drums = audio.createScriptProcessor(4096, 0, 1);
 const ui = new UI(drummer);
 drums.onaudioprocess = e => drummer.mix(e.outputBuffer.getChannelData(0));
 drums.connect(gain).connect(audio.destination);

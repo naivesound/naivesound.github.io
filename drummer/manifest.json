@@ -1,0 +1,20 @@
+{
+  "short_name": "Drummer",
+  "name": "Naivesound Drummer",
+  "icons": [
+    {
+      "src": "favicon-256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#d35400",
+  "background_color": "#ecf0f1"
+}

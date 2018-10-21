@@ -162,7 +162,7 @@ class Drummer {
     this.sampleRate = sampleRate;
     // Initialize samples
     this.samples = {};
-    Object.keys(SAMPLES).forEach(id => {
+    for (let id in SAMPLES) {
       const s = window.atob(SAMPLES[id]);
       const wave = new Float32Array(s.length / 2);
       for (let i = 0x7f; i < s.length / 2; i = i + 1) {
@@ -180,7 +180,7 @@ class Drummer {
         buffer: wave,
         volume: 0,
       };
-    });
+    }
     
     // Initialize slight volume randomization
     const shuffle = 0.5;
@@ -220,7 +220,7 @@ class Drummer {
         }
       }
 
-      Object.keys(this.samples).forEach(id => {
+      for (let id in this.samples) {
         const sample = this.samples[id];
         if (sample.volume > 0) {
           out[i] = out[i] + sample.buffer[sample.offset] * sample.volume;
@@ -230,7 +230,7 @@ class Drummer {
             sample.volume = 0;
           }
         }
-      });
+      }
 
       this.state.offset++;
       if (this.state.offset > this.sampleRate / bps) {

@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Cabin+Sketch" rel="stylesheet">
+    <style>
+      /* Minimal reset */
+      * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+      /* Minimal grid */
+      .flex { display: flex; }
+      .flex-row { flex-wrap: wrap; }
+      .flex-col { flex-direction: column; }
+      .flex-top { align-items: flex-start; }
+      .flex-middle { align-items: center; }
+      .flex-bottom { align-items: flex-end; }
+      .flex-stretch { align-items: stretch; }
+      .flex-baseline { align-items: baseline; }
+      .flex-left { justify-content: flex-start; }
+      .flex-center { justify-content: center; }
+      .flex-right { justify-content: flex-end; }
+      .flex-between { justify-content: space-between; }
+      .flex-around { justify-content: space-around; }
+      /* Make body take full screen */
+      html, body { height: 100vh; }
+
+      body {
+        font-family: 'Cabin Sketch', sans-serif;
+        font-size: 64px;
+        color: #95a5a6;
+	background-color: #ecf0f1;
+      }
+      .header {
+        color: #2c3e50;
+        margin: 24px 0;
+      }
+      .bright { color: #d35400; color: #d35400; }
+      .btn {
+        cursor: pointer;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col flex-center flex-middle">
+    <div class="flex flex-col">
+      <div class="flex flex-row flex-between">
+        <div class="header">DRUMMER</div>
+      </div>
+      <div class="flex flex-row flex-between flex-baseline">
+        <div class="btn" id="volume-minus">-</div>
+        <div class="flex flex-row">
+          <div class="btn" id="volume-0">&middot;</div>
+          <div class="btn" id="volume-1">&middot;</div>
+          <div class="btn" id="volume-2">&middot;</div>
+          <div class="btn" id="volume-3">&middot;</div>
+          <div class="btn" id="volume-4">&middot;</div>
+          <div class="btn" id="volume-5">&middot;</div>
+          <div class="btn" id="volume-6">&middot;</div>
+          <div class="btn" id="volume-7">&middot;</div>
+          <div class="btn" id="volume-8">&middot;</div>
+          <div class="btn" id="volume-9">&middot;</div>
+          <div class="btn" id="volume-10">&middot;</div>
+          <div class="btn" id="volume-11">&middot;</div>
+        </div>
+        <div class="btn" id="volume-plus">+</div>
+      </div>
+      <div class="flex flex-row flex-between">
+        <div class="btn" id="bpm-minus">-</div>
+        <div class="btn bright" id="bpm-tap">120</div>
+        <div class="btn" id="bpm-plus"/>+</div>
+      </div>
+      <div class="flex flex-row flex-between">
+        <div class="btn" id="genre-prev">&lt;</div>
+        <div class="btn bright" id="genre-name">ROCK</div>
+        <div class="btn" id="genre-next">&gt;</div>
+      </div>
+      <div class="flex flex-row flex-around">
+        <div class="btn" id="pattern-0">A</div>
+        <div class="btn" id="pattern-1">B</div>
+        <div class="btn bright" id="pattern-2">C</div>
+        <div class="btn" id="pattern-3">D</div>
+        <div class="btn" id="pattern-4">E</div>
+        <div class="btn" id="pattern-5">F</div>
+      </div>
+    </div>
+
+    <script src="samples.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

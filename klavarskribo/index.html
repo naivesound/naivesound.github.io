@@ -127,6 +127,26 @@
 			}
 		}
 
+		const save = () => localStorage['stave'] = JSON.stringify(matrix);
+		let matrix = [];
+		if (localStorage['stave']) {
+			matrix = JSON.parse(localStorage['stave']);
+		} else {
+			for (let i = 0; i < 64; i++) {
+				matrix.push({});
+			}
+			save();
+		}
+		const setter = (row) => (note) => {
+			matrix[row][note] = !matrix[row][note];
+			save();
+			render();
+		};
+
+		const getter = (row) => (note) => {
+			return matrix[row][note];
+		};
+
 		const name = document.querySelector('.song-name');
 		name.addEventListener("input", (e) => {
 			localStorage['name'] = name.innerHTML;
@@ -155,27 +175,6 @@
 			save();
 			render();
 		});
-
-		let matrix = [];
-		if (localStorage['stave']) {
-			matrix = JSON.parse(localStorage['stave']);
-		} else {
-			for (let i = 0; i < 64; i++) {
-				matrix.push({});
-			}
-			save();
-		}
-		const save = () => localStorage['stave'] = JSON.stringify(matrix);
-
-		const setter = (row) => (note) => {
-			matrix[row][note] = !matrix[row][note];
-			save();
-			render();
-		};
-
-		const getter = (row) => (note) => {
-			return matrix[row][note];
-		};
 
 		const render = () => {
 			document.querySelector('.container').className = `container ${matrix.length > 96 ? 'long' : ''}`;

@@ -1,0 +1,330 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="theme-color" content="#d35400">
+    <title>Drumm</title>
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+    <link rel="icon" type="image/png" sizes="256x256" href="favicon-256.png">
+    <link rel="icon" type="image/png" sizes="1024x1024" href="favicon-1024.png">
+    <link rel="manifest" href="manifest.json">
+    <style>
+      /* Minimal reset */
+      * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -moz-user-select: none; }
+      /* Minimal grid */
+      .flex { display: flex; }
+      .flex-row { flex-wrap: wrap; }
+      .flex-col { flex-direction: column; }
+      .flex-top { align-items: flex-start; }
+      .flex-middle { align-items: center; }
+      .flex-bottom { align-items: flex-end; }
+      .flex-stretch { align-items: stretch; }
+      .flex-baseline { align-items: baseline; }
+      .flex-left { justify-content: flex-start; }
+      .flex-center { justify-content: center; }
+      .flex-right { justify-content: flex-end; }
+      .flex-between { justify-content: space-between; }
+      .flex-around { justify-content: space-around; }
+      /* Web fonts */
+      @font-face { font-family: 'Cabin Sketch'; font-style: normal; font-weight: 400; src: local('Cabin Sketch Regular'), local('CabinSketch-Regular'), url(cabinsketch.ttf) format('truetype'); }
+      /* Make body take full screen */
+      html, body { height: 100vh; }
+      body { font-family: 'Cabin Sketch', sans-serif; font-size: 64px; color: #95a5a6; background-color: #ecf0f1; }
+      .header { color: #2c3e50; margin: 24px 0; min-width: 5em; text-align: center; }
+      .bright { color: #d35400; color: #d35400; }
+      .btn { cursor: pointer; display: inline-block; -webkit-tap-highlight-color: transparent; }
+    </style>
+  </head>
+  <body class="flex flex-col flex-center flex-middle">
+    <div class="flex flex-col">
+      <div class="flex flex-row flex-between">
+        <div class="btn header">start</div>
+      </div>
+      <div class="flex flex-row flex-between flex-baseline">
+        <div class="btn" id="volume-minus">-</div>
+        <div class="flex flex-row">
+          <div class="btn" id="volume-0">&middot;</div>
+          <div class="btn" id="volume-1">&middot;</div>
+          <div class="btn" id="volume-2">&middot;</div>
+          <div class="btn" id="volume-3">&middot;</div>
+          <div class="btn" id="volume-4">&middot;</div>
+          <div class="btn" id="volume-5">&middot;</div>
+          <div class="btn" id="volume-6">&middot;</div>
+          <div class="btn" id="volume-7">&middot;</div>
+          <div class="btn" id="volume-8">&middot;</div>
+          <div class="btn" id="volume-9">&middot;</div>
+          <div class="btn" id="volume-10">&middot;</div>
+          <div class="btn" id="volume-11">&middot;</div>
+        </div>
+        <div class="btn" id="volume-plus">+</div>
+      </div>
+      <div class="flex flex-row flex-between">
+        <div class="btn" id="bpm-minus">-</div>
+        <div class="btn bright" id="bpm-tap">120</div>
+        <div class="btn" id="bpm-plus"/>+</div>
+      </div>
+      <div class="flex flex-row flex-between">
+        <div class="btn" id="genre-prev">&lt;</div>
+        <div class="btn bright" id="genre-name">ROCK</div>
+        <div class="btn" id="genre-next">&gt;</div>
+      </div>
+      <div class="flex flex-row flex-around">
+        <div class="btn" id="pattern-0">A</div>
+        <div class="btn" id="pattern-1">B</div>
+        <div class="btn bright" id="pattern-2">C</div>
+        <div class="btn" id="pattern-3">D</div>
+        <div class="btn" id="pattern-4">E</div>
+        <div class="btn" id="pattern-5">F</div>
+      </div>
+    </div>
+
+    <!-- This is not really needed if we run in desktop app mode, but since it
+      is local network - it won't slow down things a lot I hope -->
+    <script src="assets.js"></script>
+
+    <script>
+      //
+      // Browser drummer engine implementation
+      //
+      class Drummer {
+        constructor() {
+          // Initialize audio engine
+          this.audio = new AudioContext();
+          this.sampleRate = this.audio.sampleRate;
+          this.audio.suspend();
+          this.gainNode = this.audio.createGain();
+          this.drumsNode = this.audio.createScriptProcessor(4096, 0, 1);
+          this.drumsNode.onaudioprocess = e => this.mix(e.outputBuffer.getChannelData(0));
+          this.drumsNode.connect(this.gainNode).connect(this.audio.destination);
+
+          // Pre-load samples converting them to float format from PCM S16LE
+          this.samples = [];
+          for (let id in SAMPLES) {
+            const s = window.atob(SAMPLES[id]);
+            const wave = new Float32Array(s.length / 2);
+            for (let i = 0x7f; i < s.length / 2; i = i + 1) {
+              const lo = s.charCodeAt(i * 2);
+              const hi = s.charCodeAt(i * 2 + 1);
+              const sign = hi > 127;
+              let v = (hi&0x7f) * 256 + lo;
+              if (hi > 127) {
+                v = -0x8000 + v;
+              }
+              wave[i] = v / 0x8000;
+            }
+            this.samples.push({
+              id: id,
+              offset: 0,
+              buffer: wave,
+              volume: 0,
+            });
+          }
+
+          // Initialize internal state
+          this.isPlaying = false;
+          this.bpm = 120;
+          this.step = 0;
+          this.offset = 0;
+          this.genre = 'ROCK';
+          this.gain = 1;
+          this.pattern = 0;
+        }
+        play() {
+          this.audio.resume();
+          this.isPlaying = true;
+        }
+        stop() {
+          this.audio.suspend();
+          this.isPlaying = false;
+          this.offset = 0;
+          this.step = 0;
+        }
+        setGain(gain) {
+          this.gain = gain;
+          this.gainNode.gain.value = this.gain;
+        }
+        setBPM(bpm) {
+          this.bpm = bpm;
+        }
+        setGenre(genre) {
+          this.genre = genre;
+          if (this.pattern >= PATTERNS[this.genre].length) {
+            this.pattern = 0;
+          }
+        }
+        setPattern(pattern) {
+          this.pattern = pattern;
+        }
+        async state() {
+          return {
+            isPlaying: this.isPlaying,
+            bpm: this.bpm,
+            gain: this.gain,
+            pattern: this.pattern,
+            numPatterns: PATTERNS[this.genre].length,
+            genre: this.genre,
+            genres: Object.keys(PATTERNS),
+          };
+        }
+        mix(out) {
+          const p = PATTERNS[this.genre][this.pattern];
+          const bps = this.bpm / 60 * p.speed / 4;
+          for (let i = 0; i < out.length; i++) {
+            let v = 0;
+            if (this.offset === 0) {
+              for (let j = 0; j < p.pattern.length; j++) {
+                const volume = p.pattern[j][this.step % p.pattern[j].length];
+                if (volume > 0) {
+                  const drum = p.drums[j];
+                  for (let i = 0; i < this.samples.length; i++) {
+                    if (this.samples[i].id === drum) {
+                      this.samples[i].volume = volume / 9;
+                      this.samples[i].offset = 0;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+
+            for (let i = 0; i < this.samples.length; i++) {
+              const sample = this.samples[i];
+              if (sample.volume > 0) {
+                v = v + sample.buffer[sample.offset] * sample.volume;
+                sample.offset++;
+                if (sample.offset == sample.buffer.length) {
+                  sample.offset = 0;
+                  sample.volume = 0;
+                }
+              }
+            }
+
+            out[i] = v;
+            this.offset++;
+            if (this.offset > this.sampleRate / bps) {
+              this.step++;
+              this.offset = 0;
+            }
+          }
+        }
+      }
+
+      class NativeDrummer {
+        async play() { await window.drummPlay(); }
+        async stop() { await window.drummStop(); }
+        async setGain(gain) { await window.drummSetGain(gain); }
+        async setBPM(bpm) { await window.drummSetBPM(bpm); }
+        async setGenre(genre) { await window.drummSetGenre(genre); }
+        async setPattern(pattern) { await window.drummSetPattern(pattern); }
+        async state() { return await window.drummState(); }
+      }
+
+      // Update UI with a new state
+      const render = (state) => {
+        document.querySelector('.header').textContent = state.isPlaying ? 'stop' : 'start!';
+        document.querySelector('#bpm-tap').textContent = state.bpm;
+        document.querySelector('#genre-name').textContent = state.genre;
+        for (let i = 0; i < 12; i++) {
+          document.querySelector('#volume-' + i).className = 'btn ' + (i < state.gain * 12 ? ' bright' : '');
+        }
+        for (let i = 0; i < 6; i++) {
+          const el = document.querySelector('#pattern-' + i);
+          if (i >= state.numPatterns) {
+            el.style = 'display: none;';
+          } else {
+            el.style = '';
+          }
+
+          if (i == state.pattern) {
+            el.className = 'btn bright';
+          } else {
+            el.className = 'btn';
+          }
+        }
+      };
+
+      // Bind UI to the drummer engine
+      const drummer = window['is_lorca'] ? new NativeDrummer() : new Drummer();
+
+      const onClick = (el, fn) => {
+        document.querySelector(el).addEventListener('click', async () => {
+          await fn();
+          const state = await drummer.state();
+          await render(state);
+        });
+      };
+
+      const incrVolume = async v => {
+        const state = await drummer.state();
+        drummer.setGain(Math.min(Math.max(state.gain + v, 0), 1));
+      };
+
+      const setBPM = bpm => {
+        const MAX_BPM = 240;
+        const MIN_BPM = 30;
+        drummer.setBPM(Math.max(Math.min(bpm, MAX_BPM), MIN_BPM) | 0);
+      };
+
+      const incrBPM = async delta => {
+        const state = await drummer.state();
+        setBPM(state.bpm + delta);
+      };
+
+      const setGenre = async offset => {
+        const state = await drummer.state();
+        let i = state.genres.indexOf(state.genre);
+        i = (i + offset + state.genres.length) % state.genres.length;
+        drummer.setGenre(state.genres[i]);
+      };
+
+      // Play/pause button
+      onClick('.header', async () => {
+        const state = await drummer.state();
+        if (state.isPlaying) {
+          drummer.stop();
+        } else {
+          drummer.play();
+        }
+      });
+
+      // Volume, BPM and genre plus/minus buttons
+      onClick('#volume-minus', () => incrVolume(-1/12));
+      onClick('#volume-plus', () => incrVolume(1/12));
+      onClick('#bpm-plus', () => incrBPM(1));
+      onClick('#bpm-minus', () => incrBPM(-1));
+      onClick('#genre-prev', () => setGenre(-1));
+      onClick('#genre-next', () => setGenre(1));
+
+      // BPM text as a tap button
+      let lastTap = new Date();
+      onClick('#bpm-tap', async () => {
+        const delta = (new Date() - lastTap) / 1000;
+        lastTap = new Date();
+        const state = await drummer.state();
+        setBPM(state.bpm * 0.8 + 60/delta * 0.2);
+      });
+
+      // Volume dots
+      for (let i = 0; i < 12; i++) {
+        onClick('#volume-' + i, () => drummer.setGain(i/12 + 1/12));
+      }
+
+      // Pattern selection
+      for (let i = 0; i < 6; i++) {
+        onClick('#pattern-' + i, () => drummer.setPattern(i));
+      }
+
+      // Initial render
+      window.onload = async () => {
+        const state = await drummer.state();
+        render(state);
+      };
+
+      // PWA
+      if('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
+  </body>
+</html>

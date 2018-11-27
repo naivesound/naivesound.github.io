@@ -18,8 +18,8 @@
       "type": "image/png"
     }
   ],
-  "start_url": "https://naivesound.com/drummer",
+  "start_url": "https://naivesound.com/drumm",
   "display": "standalone",
-  "theme_color": "#d35400",
+  "theme_color": "#db2f27",
   "background_color": "#ecf0f1"
 }

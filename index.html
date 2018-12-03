@@ -1,68 +1,164 @@
 <html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:100,300,400,500,700,900" rel="stylesheet">
-		<link href="styles.css" rel="stylesheet">
-	</head>
-	<body>
+  <head>
+    <title>NAIVESOUND</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#222222">
+    <link rel="shortcut icon" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:100,300,400,500,700,900" rel="stylesheet">
+    <style>
+      /* Minimal reset */
+      * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+      /* Minimal grid */
+      .flex { display: flex; }
+      .flex-row { flex-wrap: wrap; }
+      .flex-col { flex-direction: column; }
+      .flex-top { align-items: flex-start; }
+      .flex-middle { align-items: center; }
+      .flex-bottom { align-items: flex-end; }
+      .flex-stretch { align-items: stretch; }
+      .flex-baseline { align-items: baseline; }
+      .flex-left { justify-content: flex-start; }
+      .flex-center { justify-content: center; }
+      .flex-right { justify-content: flex-end; }
+      .flex-between { justify-content: space-between; }
+      .flex-around { justify-content: space-around; }
+      /* Colors */
+      .white { color: #fff; }
+      .red { color: #db2f27; }
+      .purple { color: #08327d; }
+      .yellow { color: #ffeb00; }
+      .orange { color: #ff9800; }
+      .grey { color: #9E9E9E; }
+      .green { color: #259b24; }
+      .green { color: #27ae60; }
+      .blue { color: #03a9f4; }
+      .pink { color: #de3d83; }
+      .darkgrey { color: #666666; }
+      .magenta { color: #9b59b6; }
+      /* Text */
+      .bold { font-weight: 700; }
+      .absolute { position: absolute; }
+      .behind { z-index: -1; }
+      .align-right { text-align: right; }
 
-		<section class="main-section">
+      body { font-family: 'Roboto Condensed', sans-serif; font-size: 22px; background: url('noise.png'), #222; padding: 4rem; }
+      a { color: inherit; text-decoration: none; }
+      ul, li { list-style: none; }
+      h1 { font-size: 12vw; margin-left: -0.05em; }
+      .links { border-left-width: 4px; border-left-style: solid; padding-left: 1em; margin-left: 1em;}
+      .links a:hover { text-decoration: underline; }
+      .inspiring-words { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .card { width: 350px; margin: 2vw 4vw 2vw 0; }
+      .card h2 { position: absolute; font-size: 76px; z-index: -1; text-transform: uppercase; }
+      .card h3 { margin-top: 52px; margin-bottom: 30px; min-height: 80px; font-size: 36px; text-align: right; text-transform: uppercase; }
 
-			<section class="header-section">
-				<section class="title-section">
-					<h1 class="title">NAIVESOUND</h1>
-				</section>
-				<section class="links-section">
-					<p><a href="https://soundcloud.com/naivesound">soundcloud</a></p>
-					<p><a href="https://www.youtube.com/channel/UClxhLG9WHg3NQveIS5jXdYg">youtube</a></p>
-					<p><a href="https://twitter.com/naive_sound">twitter</a></p>
-					<p><a href="https://github.com/naivesound">github</a></p>
-					<p><a href="mailto:naivesnd@gmail.com">contact us</a></p>
-				</section>
-			</section>
+      @media (max-width: 920px) {
+        body { padding: 1em; }
+        header { flex-direction: column; justify-content: center; margin-bottom: 10vh; }
+        .products { justify-content: space-around; }
+        .links {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          border-left-style: none;
+          border-bottom-style: solid;
+          border-bottom-width: 4px;
+          align-self: stretch;
+          order: -1;
+          flex-wrap: wrap;
+          padding: 1em 0;
+          margin: 0 0 1em 0;
+        }
+        .links a { padding: 0 0.25em; }
+        .more-words { display: none; }
+      }
+    </style>
+  </head>
+  <body class="white">
+    <section class="flex flex-col">
+      <header class="flex flex-row flex-middle">
+        <h1>NAIVESOUND</h1>
+        <ul class="links">
+          <li><a href="https://soundcloud.com/naivesound">soundcloud</a></li>
+          <li><a href="https://www.youtube.com/channel/UClxhLG9WHg3NQveIS5jXdYg">youtube</a></li>
+          <li><a href="https://medium.com/@naive_sound">medium</a></li>
+          <li><a href="https://twitter.com/naive_sound">twitter</a></li>
+          <li><a href="mailto:naivesnd@gmail.com">contact us</a></li>
+        </ul>
 
-			<section class="inspiring-words">
-				Let music be your hobby.
-				<span class="more-words">
-					Make art. Enjoy. Create. Discover. Invent. Begin. Make progress. Explore. Think up. Find. Conceptualize. Experiment. Achieve.
-				</span>
-			</section>
+      <section class="inspiring-words">
+        LET MUSIC BE YOUR HOBBY.
+        <span class="more-words">
+          MAKE ART. ENJOY. CREATE. DISCOVER. INVENT. BEGIN. MAKE PROGRESS. EXPLORE. THINK UP. FIND. CONCEPTUALIZE. EXPERIMENT. ACHIEVE.
+        </span>
+      </section>
+      </header>
 
-			<section class="products">
+      <section class="products flex flex-row">
+        <section class="flex flex-col card">
+          <a href="/cassette">
+            <h2 class="magenta">Cassette</h2>
+            <h3>Record, mix, repeat</h3>
+            <p>Two-track sound recorder for capturing your music ideas. A minimal DAW in its simplest form.</p>
+          </a>
+        </section>
 
-				<section class="product-section product-glitch">
-					<a href="/products/glitch/">
-						<h2 class="product-title">Glitch</h2>
-						<p class="product-pitch">Type in a formula, enjoy the sound</p>
-						<p class="product-description">Simple environment for making algorithmic music and live coding, it uses arithmetics to create musical patterns and sounds.</p>
-					</a>
-				</section>
+        <section class="flex flex-col card">
+          <a href="/drumm">
+            <h2 class="red">Drumm</h2>
+            <h3>Beat it. Just beat it.</h3>
+            <p>A minimal drum machine. Several drum loops in different styles and tempo, add your own melody.</p>
+          </a>
+        </section>
 
-				<section class="product-section product-scherzo">
-					<a href="/products/scherzo">
-						<h2 class="product-title">Scherzo</h2>
-						<p class="product-pitch">A friendly voice for your MIDI keyboard</p>
-						<p class="product-description">Uncomplicated virtual piano with metronome and looper, perfect for beginners.</p>
-					</a>
-				</section>
+        <section class="flex flex-col card">
+          <a href="/eno">
+            <h2 class="grey">Eno</h2>
+            <h3>A friendly voice for your MIDI keyboard</h3>
+            <p>Uncomplicated virtual piano with metronome and looper, perfect for beginners.</p>
+          </a>
+        </section>
 
-				<section class="product-section product-encore">
-					<a href="/products/encore">
-						<h2 class="product-title">Encore</h2>
-						<p class="product-pitch">Record, play, repeat</p>
-						<p class="product-description">Classic audio looper for solo practice and live performance.</p>
-					</a>
-				</section>
+        <section class="flex flex-col card">
+          <a href="/fugue">
+            <h2 class="blue">Fugue</h2>
+            <h3>Put all your notes on the table</h3>
+            <p class="product-description">Cross-platform music sequencer inspired by retro chiptune trackers.</p>
+          </a>
+        </section>
 
-				<section class="product-section product-fugue">
-					<a href="/products/fugue">
-						<h2 class="product-title">Fugue</h2>
-						<p class="product-pitch">Put all your notes on the table</p>
-						<p class="product-description">Cross-platform music sequencer inspired by retro chiptune trackers.</p>
-					</a>
-				</section>
-			</section>
+        <section class="flex flex-col card">
+          <a href="/glitch">
+            <h2 class="orange">Glitch</h2>
+            <h3>Type in a formula, enjoy the sound</h3>
+            <p class="product-description">Simple environment for making algorithmic music and live coding, it uses arithmetics to create musical patterns and sounds.</p>
+          </a>
+        </section>
 
-		</section>
-	</body>
+        <section class="flex flex-col card">
+          <a href="/accord">
+            <h2 class="pink">Accord</h2>
+            <h3>Your own personal accompaniment</h3>
+            <p class="product-description">Create a backing track from a sequence of chords and play along.</p>
+          </a>
+        </section>
+
+        <section class="flex flex-col card">
+          <a href="/bits-and-pieces">
+            <h2 class="green">B&amp;P</h2>
+            <h3>Bits and pieces.</h3>
+            <p class="product-description">Collections of small printable papers, booklets, reference cards, DIY kits for learning and practice.</p>
+          </a>
+        </section>
+
+        <section class="flex flex-col card">
+          <a href="/klavar">
+            <h2 class="darkgrey">Klavar</h2>
+            <h3>A friendly music notation</h3>
+            <p class="product-description">Simple, intuitive keyboard music notation, invented in Netherlands, very similar to piano roll.</p>
+          </a>
+        </section>
+      </section>
+    </section>
+  </body>
 </html>

@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Klavarskribo - simplified music notation</title>
+    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" sizes="32x32" href="favicon-32.png">
+    <link rel="shortcut icon" href="favicon-72.png">
+    <link rel="apple-touch-icon" href="favicon-48.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="favicon-72.png">
+    <link rel="apple-touch-icon" sizes="96x96" href="favicon-96.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="favicon-144.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
+    <link rel="manifest" href="manifest.json">
+		<link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+		<style>
+			* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Raleway', sans-serif; }
+			[contenteditable]:focus { outline: 0px solid transparent; }
+			h1 { text-align: center; font-weight: normal; padding: 2em; }
+			.container { display: flex; flex-direction: column; align-items: center; }
+			.stave {line-height: 0; }
+			svg { display: block; }
+			circle {
+				fill: #fff;
+				fill-opacity: 0;
+			}
+			circle:hover {
+				fill: red;
+				fill-opacity: 1;
+			}
+			circle.white {
+				stroke: #000;
+				stroke-width: 2;
+				fill: #fff;
+				fill-opacity: 1;
+			}
+			circle.black {
+				stroke: #000;
+				stroke-width: 2;
+				fill: #000;
+				fill-opacity: 1;
+			}
+			.toolbar { display: flex; justify-content: center; }
+			.btn { font-size: 1em; padding: 1em; cursor: pointer; }
+			@media print {
+				h1 { column-span: all; }
+				.btn { display: none; }
+				html, body { height: 100%; }
+				.container.long { display: block; height: 100%; column-fill: auto; column-count: 2; }
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1 class="song-name" contenteditable="true">Klavarskribo</h1>
+			<div class="stave"></div>
+			<div class="toolbar">
+				<div class="btn" onclick="window.print()">print</div>
+				<div class="btn add">add</div>
+				<div class="btn remove">remove</div>
+				<div class="btn clear">clear</div>
+			</div>
+		</div>
+	<script>
+		const rows = {};
+		const circles = {};
+
+		function row(stave, rowID, from, to, getter, setter) {
+			const scale = 8;
+			const xmlns = 'http://www.w3.org/2000/svg';
+			let svg = rows[rowID];
+			if (!svg) {
+				svg = document.createElementNS(xmlns, 'svg');
+				svg.setAttributeNS(null, "width", (to - from) * scale);
+				svg.setAttributeNS(null, "height", scale);
+				for (let i = from; i < to; i++) {
+					const note = i % 12;
+					if (note == 1 || note == 3 || note == 6 || note == 8 || note == 10) {
+						const line = document.createElementNS(xmlns, "line");
+						line.setAttribute("x1", scale / 2 + ((i - from) * scale));
+						line.setAttribute("y1", 0);
+						line.setAttribute("x2", scale / 2 + ((i - from) * scale));
+						line.setAttribute("y2", scale);
+						line.setAttribute("stroke", '#333');
+						line.setAttribute("stroke-width", 1);
+						if (note == 1 || note == 3) {
+							if (i == 61 || i == 63) {
+								line.setAttribute('stroke-dasharray', scale / 4);
+							} else {
+								line.setAttribute("stroke-width", 1);
+								line.setAttribute("stroke", '#888');
+							}
+						}
+						svg.appendChild(line);
+					}
+				}
+				svg.addEventListener('click', (e) => {
+					let circles = Array.from(svg.querySelectorAll('circle'));
+					circles.forEach((c, i) => {
+						let cx = c.getBoundingClientRect().x + scale/2;
+						if (Math.abs(e.clientX - cx) < scale / 2) {
+							setter(from + i);
+						}
+					});
+				});
+				stave.appendChild(svg);
+				rows[rowID] = svg;
+				circles[rowID] = {};
+			}
+
+			for (let i = from; i < to; i++) {
+				const note = i % 12;
+				let dot = circles[rowID][i];
+				if (!dot) {
+					dot = document.createElementNS(xmlns, "circle");
+					dot.setAttribute("r", scale / 2 *1.2 - 2);
+					dot.setAttribute("cx", scale / 2 + ((i - from) * scale));
+					dot.setAttribute("cy", scale / 2);
+					svg.appendChild(dot);
+					circles[rowID][i] = dot;
+				}
+
+				if (getter(i)) {
+					if (note == 1 || note == 3 || note == 6 || note == 8 || note == 10) {
+						dot.className.baseVal = 'black';
+					} else {
+						dot.className.baseVal = 'white';
+					}
+				} else {
+					dot.className.baseVal = '';
+				}
+			}
+		}
+
+		const save = () => localStorage['stave'] = JSON.stringify(matrix);
+		let matrix = [];
+		if (localStorage['stave']) {
+			matrix = JSON.parse(localStorage['stave']);
+		} else {
+			for (let i = 0; i < 64; i++) {
+				matrix.push({});
+			}
+			save();
+		}
+		const setter = (row) => (note) => {
+			matrix[row][note] = !matrix[row][note];
+			render();
+		};
+
+		const getter = (row) => (note) => {
+			return matrix[row][note];
+		};
+
+		const name = document.querySelector('.song-name');
+		name.addEventListener("input", (e) => {
+			localStorage['name'] = name.innerHTML;
+		});
+		if (localStorage['name']) {
+			name.innerHTML = localStorage['name'];
+		} else {
+			name.innerHTML = 'Klavarskribo';
+		}
+
+		const stave = document.querySelector('.stave');
+		document.querySelector('.clear').addEventListener('click', () => {
+			if (confirm('Are you sure you want to clear all the notes?')) {
+				matrix = [];
+				for (let i = 0; i < 64; i++) {
+					matrix.push({});
+				}
+				render();
+			}
+		});
+		document.querySelector('.add').addEventListener('click', () => {
+			for (let i = 0; i < 16; i++) {
+				matrix.push({});
+			}
+			render();
+		});
+		document.querySelector('.remove').addEventListener('click', () => {
+			if (matrix.length < 16) {
+				return;
+			}
+			matrix = matrix.slice(0, matrix.length - 16);
+			render();
+		});
+
+		const render = () => {
+			save();
+			document.querySelector('.container').className = `container ${matrix.length > 96 ? 'long' : ''}`;
+			for (let j = stave.childElementCount - 1; j >= matrix.length; j--) {
+				stave.removeChild(stave.children[j]);
+				rows[j] = undefined;
+				circles[j] = undefined;
+			}
+			for (let i = 0; i < matrix.length; i++) {
+				row(stave, i, 48, 84, getter(i), setter(i));
+			}
+			if (!window.matrix) {
+				window.matrix = matrix;
+				window.render = render;
+			}
+		}
+		render();
+
+		// PWA
+		if('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('sw.js');
+		}
+	</script>
+	</body>
+</html>

@@ -152,12 +152,18 @@
         }
         setGenre(genre) {
           this.genre = genre;
+          this.offset = 0;
+          this.step = 0;
           if (this.pattern >= PATTERNS[this.genre].length) {
             this.pattern = 0;
           }
         }
         setPattern(pattern) {
+          if (pattern >= PATTERNS[this.genre].length) {
+            return;
+          }
           this.pattern = pattern;
+          this.offset = this.step = 0;
         }
         async state() {
           return {
@@ -282,14 +288,15 @@
       };
 
       // Play/pause button
-      onClick('.header', async () => {
+      const togglePlayback = async () => {
         const state = await drummer.state();
         if (state.isPlaying) {
           drummer.stop();
         } else {
           drummer.play();
         }
-      });
+      };
+      onClick('.header', togglePlayback);
 
       // Volume, BPM and genre plus/minus buttons
       onClick('#volume-minus', () => incrVolume(-1/12));
@@ -324,9 +331,61 @@
         render(state);
       };
 
-      // PWA
-      if('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
+      // Hotkeys
+      const hotkeys = {
+        'Comma': async () => setGenre(-1),
+        'Period': async () => setGenre(1),
+        'KeyZ': async () => setGenre(-1),
+        'KeyX': async () => setGenre(1),
+        'ArrowLeft': async () => setGenre(-1),
+        'ArrowRight': async () => setGenre(1),
+        'ArrowUp': async () => incrBPM(1),
+        'ArrowDown': async () => incrBPM(-1),
+        'Equal': async () => incrVolume(1/12),
+        'Plus': async () => incrVolume(1/12),
+        'Minus': async () => incrVolume(-1/12),
+        'Space': async () => togglePlayback(),
+        'Enter': async () => togglePlayback(),
+        'Digit1': async () => drummer.setPattern(0),
+        'Digit2': async () => drummer.setPattern(1),
+        'Digit3': async () => drummer.setPattern(2),
+        'Digit4': async () => drummer.setPattern(3),
+        'Digit5': async () => drummer.setPattern(4),
+        'Digit6': async () => drummer.setPattern(5),
+        'KeyA': async () => drummer.setPattern(0),
+        'KeyB': async () => drummer.setPattern(1),
+        'KeyC': async () => drummer.setPattern(2),
+        'KeyD': async () => drummer.setPattern(3),
+        'KeyE': async () => drummer.setPattern(4),
+        'KeyF': async () => drummer.setPattern(5),
+      };
+      window.addEventListener('keydown', async (e) => {
+        let key = ((e.ctrlKey || e.metaKey) ? 'Ctrl+' : '') + e.code;
+        let f = hotkeys[key];
+        if (f) {
+          await f();
+          const state = await drummer.state();
+          render(state);
+        }
+      });
+
+      if (window['is_lorca']) {
+        // Disable context menu
+        window.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+        }, false);
+        // Disable F12 and Ctrl+Shift+I
+        window.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey && e.shiftKey && e.keyCode === 74) || e.keyCode === 123) {
+            e.preventDefault();
+          }
+        }, false);
+        // 
+      } else {
+        // PWA
+        if('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('sw.js');
+        }
       }
     </script>
   </body>

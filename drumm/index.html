@@ -163,7 +163,8 @@
             return;
           }
           this.pattern = pattern;
-          this.offset = this.step = 0;
+          this.offset = 0;
+          this.step = 0;
         }
         async state() {
           return {
@@ -376,11 +377,10 @@
         }, false);
         // Disable F12 and Ctrl+Shift+I
         window.addEventListener('keydown', (e) => {
-          if ((e.ctrlKey && e.shiftKey && e.keyCode === 74) || e.keyCode === 123) {
+          if ((e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || e.keyCode === 123) {
             e.preventDefault();
           }
         }, false);
-        // 
       } else {
         // PWA
         if('serviceWorker' in navigator) {

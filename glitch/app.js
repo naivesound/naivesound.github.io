@@ -367,11 +367,13 @@ function WebRPC() {
   this.togglePlayback = function() {
     this.data.isPlaying = !this.data.isPlaying;
     if (this.data.isPlaying) {
+      audioContext.resume();
       this.pcm.connect(this.analyser);
       this.pcm.onaudioprocess = this.audioCallback.bind(this);
     } else {
       this.pcm.disconnect();
       this.pcm.onaudioprocess = undefined;
+      audioCallback.suspend();
     }
     this.render();
   };

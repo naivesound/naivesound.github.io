@@ -93,6 +93,7 @@
       class Drummer {
         constructor() {
           // Initialize audio engine
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
           this.audio = new AudioContext();
           this.sampleRate = this.audio.sampleRate;
           this.audio.suspend();
